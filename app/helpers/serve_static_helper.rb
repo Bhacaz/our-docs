@@ -1,0 +1,2 @@
+module ServeStaticHelper
+end
