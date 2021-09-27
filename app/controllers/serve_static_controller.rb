@@ -1,15 +1,14 @@
 class ServeStaticController < ApplicationController
-  SITE_MAP = {
-    'chapter-rails-blog' => '_site',
-    'test' => '_site2'
-  }
 
   layout false
+  skip_forgery_protection
 
   def index
-    status, headers, body = ::Rack::File.new(nil)
-                                        .serving(request, Rails.root.join(SITE_MAP[params[:site]], params[:file] || 'index.html'))
-    p body
+    repo = "#{params[:owner]}/#{params[:project]}"
+    site = Site.find_by!(repo: repo)
+    status, headers, body =
+      ::Rack::File.new(nil)
+                  .serving(request, Rails.root.join('sites', site.site_folder, params[:file] || 'index.html'))
     render file: body.path, headers: headers, status: status
   end
 end

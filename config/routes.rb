@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :sites
   # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
 
   # Almost every application defines a route for the root path ("/") at the top of this file.
@@ -8,5 +9,5 @@ Rails.application.routes.draw do
   get '/auth', to: 'auth#index'
   get '/auth/github/callback', to: 'auth#create'
 
-  # get '/:site(/:path)', to: 'serve_static#index'
+  get '/:owner/:project(/*file)', to: 'serve_static#index', constraints: { file: %r{.+} }
 end

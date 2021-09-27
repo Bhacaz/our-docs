@@ -69,3 +69,4 @@ group :test do
 end
 
 gem 'omniauth-github'
+gem "octokit", "~> 4.0"
