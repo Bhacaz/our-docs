@@ -1,5 +1,7 @@
 require 'jwt'
 require 'openssl'
+require 'open-uri'
+require 'zip'
 
 class InstallationClient
   PRIVATE_PEM_PATH = 'ourdocs-app.2021-09-20.private-key.pem'
@@ -11,6 +13,19 @@ class InstallationClient
 
   def branches
     installation_client.branches @site.repo
+  end
+
+  def download_archive
+    sha = branches.detect { |branch| branch[:name] == @site.branch }[:commit][:sha]
+    link = installation_client.archive_link(@site.repo, format: 'zipball', ref: sha)
+    file_path = Rails.root.join('tmp', "#{@site.site_folder}.zip")
+    IO.copy_stream(URI.parse(link).open, file_path)
+    most_recent_content_folder = extract_zip(file_path, Rails.root.join('sites', @site.site_folder)).keys.first
+    toggle_content(most_recent_content_folder)
+  end
+
+  def toggle_content(most_recent_content_folder_name)
+    File.symlink(Rails.root.join('sites', @site.site_folder), Rails.root.join('tmp', most_recent_content_folder_name))
   end
 
   private
@@ -40,23 +55,15 @@ class InstallationClient
     installation_id = app_client.find_installations.detect { |installation| installation[:id] == @site.installation_id }[:id]
     app_client.create_app_installation_access_token(installation_id)[:token]
   end
+
+  def extract_zip(file, destination)
+    FileUtils.mkdir_p(destination)
+
+    ::Zip::File.open(file) do |zip_file|
+      zip_file.each do |f|
+        fpath = File.join(destination, f.name)
+        zip_file.extract(f, fpath) unless File.exist?(fpath)
+      end
+    end
+  end
 end
-
-return
-
-# client = Octokit::Client.new(:client_id  => "Iv1.69c45daa3ff9b3a7",  :client_secret => "87acd3645dc44c58047ace67e43762c3a8374d74")
-# client.branches 'Bhacaz/private-docs-as-code'
-#
-#
-# # Private key contents
-#
-# # Generate the JWT
-#
-# client = Octokit::Client.new(bearer_token: jwt)
-#
-#
-# installation_id = client.find_installations.first[:id]
-# token = client.create_app_installation_access_token(installation_id)[:token]
-#
-# installation_client = Octokit::Client.new(access_token: token)
-# installation_client.branches 'Bhacaz/private-docs-as-code'
