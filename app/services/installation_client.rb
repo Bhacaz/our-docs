@@ -18,17 +18,20 @@ class InstallationClient
   def download_archive
     sha = branches.detect { |branch| branch[:name] == @site.branch }[:commit][:sha]
     link = installation_client.archive_link(@site.repo, format: 'zipball', ref: sha)
-    file_path = Rails.root.join('tmp', "#{@site.site_folder}.zip")
-    IO.copy_stream(URI.parse(link).open, file_path)
-    most_recent_content_folder = extract_zip(file_path, Rails.root.join('sites', @site.site_folder)).keys.first
-    toggle_content(most_recent_content_folder)
+    IO.copy_stream(URI.parse(link).open, download_archive_file_path)
+    @most_recent_content_folder = extract_zip(download_archive_file_path, extract_path).keys.first
+    toggle_content
   end
 
-  def toggle_content(most_recent_content_folder_name)
-    File.symlink(Rails.root.join('sites', @site.site_folder), Rails.root.join('tmp', most_recent_content_folder_name))
+  def toggle_content
+    # FileUtils.ln_s("#{last_archive_folder_path}/", site_folder_path.to_s)
+    # TODO: Use some symlink to achive that
+    FileUtils.remove_dir(site_folder_path)
+    FileUtils.mv(last_archive_folder_path, Rails.root.join('sites'))
+    File.rename(Rails.root.join('sites', @most_recent_content_folder), site_folder_path)
   end
 
-  private
+  # private
 
   def generate_jwt
     private_key = OpenSSL::PKey::RSA.new(File.read(PRIVATE_PEM_PATH))
@@ -54,6 +57,27 @@ class InstallationClient
   def installation_token
     installation_id = app_client.find_installations.detect { |installation| installation[:id] == @site.installation_id }[:id]
     app_client.create_app_installation_access_token(installation_id)[:token]
+  end
+
+  # Where to download the archive zip in "tmp/Bhacaz__private-docs-as-code/Bhacaz__private-docs-as-code.zip"
+  def download_archive_file_path
+    Rails.root.join('tmp', @site.site_folder, "#{@site.site_folder}.zip")
+  end
+
+  # Where static site content is "sites/Bhacaz__private-docs-as-code"
+  def site_folder_path
+    Rails.root.join('sites', @site.site_folder)
+  end
+
+  # Where the last extracted version of the site is with is sha
+  #   "sites/Bhacaz__private-docs-as-code/Bhacaz-private-docs-as-code-16ba471fccfbccf32bdbbe724e2579499916f8c8"
+  def last_archive_folder_path
+    Rails.root.join('tmp', @site.site_folder, @most_recent_content_folder)
+  end
+
+  # To extract the zip "tmp/Bhacaz__private-docs-as-code"
+  def extract_path
+    Rails.root.join('tmp', @site.site_folder)
   end
 
   def extract_zip(file, destination)
