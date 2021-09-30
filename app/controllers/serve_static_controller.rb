@@ -1,4 +1,5 @@
 class ServeStaticController < ApplicationController
+  include DocsAccessConcern
 
   layout false
   skip_forgery_protection
@@ -9,6 +10,11 @@ class ServeStaticController < ApplicationController
 
     repo = "#{params[:owner]}/#{params[:project]}"
     site = Site.find_by!(repo: repo)
+
+    unless can_access?(repo)
+      raise ActionController::RoutingError.new('Not Found')
+    end
+
     status, headers, body =
       ::Rack::File.new(nil)
                   .serving(request, Rails.root.join('sites', site.site_folder, file || 'index.html'))
