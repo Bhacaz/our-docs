@@ -11,16 +11,18 @@ class InstallationClient
     @site = site
   end
 
-  def branches
-    installation_client.branches @site.repo
-  end
-
-  def download_archive
+  def download_new_version
     sha = branches.detect { |branch| branch[:name] == @site.branch }[:commit][:sha]
     link = installation_client.archive_link(@site.repo, format: 'zipball', ref: sha)
     IO.copy_stream(URI.parse(link).open, download_archive_file_path)
     @most_recent_content_folder = extract_zip(download_archive_file_path, extract_path).keys.first
     toggle_content
+  end
+
+  private
+
+  def branches
+    installation_client.branches @site.repo
   end
 
   def toggle_content
@@ -30,8 +32,6 @@ class InstallationClient
     FileUtils.mv(last_archive_folder_path, Rails.root.join('sites'))
     File.rename(Rails.root.join('sites', @most_recent_content_folder), site_folder_path)
   end
-
-  # private
 
   def generate_jwt
     private_key = OpenSSL::PKey::RSA.new(File.read(PRIVATE_PEM_PATH))

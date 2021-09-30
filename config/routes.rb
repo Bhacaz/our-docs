@@ -10,4 +10,5 @@ Rails.application.routes.draw do
   get '/auth/github/callback', to: 'auth#create'
 
   get '/:owner/:project(/*file)', to: 'serve_static#index', constraints: { file: %r{.+} }
+  post '/github/webhooks', to: 'github/webhooks#webhook'
 end
