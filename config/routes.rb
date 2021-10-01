@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :users
   resources :sites
   # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
 
@@ -8,7 +9,6 @@ Rails.application.routes.draw do
   # get '/auth/github', as: 'github_login'
   get '/auth', to: 'auth#index'
   get '/auth/github/callback', to: 'auth#create'
-
   get '/:owner/:project(/*file)', to: 'serve_static#index', constraints: { file: %r{.+} }
   post '/github/webhooks', to: 'github/webhooks#webhook'
 end
