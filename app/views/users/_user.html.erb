@@ -1,15 +1,19 @@
 <div id="<%= dom_id user %>" class="scaffold_record">
   <p>
+    <%= image_tag user.profile_picture, height: 72, width: 72 %>
+  </p>
+  <p>
     <strong>Username:</strong>
     <%= user.username %>
   </p>
 
   <p>
-    <strong>Email:</strong>
-    <%= user.email %>
+    <strong>Name:</strong>
+    <%= user.name %>
   </p>
 
   <p>
-    <%= link_to "Show this user", user %>
+    <strong>Email:</strong>
+    <%= user.email %>
   </p>
 </div>
