@@ -3,7 +3,7 @@ require 'openssl'
 require 'open-uri'
 require 'zip'
 
-class InstallationClient
+class SiteRemoteManager
   PRIVATE_PEM_PATH = 'ourdocs-app.2021-09-20.private-key.pem'
   APP_ID = 139445
 
@@ -11,9 +11,15 @@ class InstallationClient
     @site = site
   end
 
+  def init_folder_content_and_download
+    FileUtils.mkdir_p(site_folder_path)
+    download_new_version
+  end
+
   def download_new_version
     sha = branches.detect { |branch| branch[:name] == @site.branch }[:commit][:sha]
     link = installation_client.archive_link(@site.repo, format: 'zipball', ref: sha)
+    FileUtils.mkdir_p(extract_path)
     IO.copy_stream(URI.parse(link).open, download_archive_file_path)
     @most_recent_content_folder = extract_zip(download_archive_file_path, extract_path).keys.first
     toggle_content

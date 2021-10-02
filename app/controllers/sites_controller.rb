@@ -14,7 +14,7 @@ class SitesController < ApplicationController
   # GET /sites/new
   def new
     @site = Site.new
-    @repository_names = AvailableRepositories.new(@user, session[:token]).repository_names
+    @repository_names = AvailableRepositories.new(@user, session[:token]).repository_names_and_installation_ids
   end
 
   # GET /sites/1/edit
@@ -27,7 +27,8 @@ class SitesController < ApplicationController
     @site.user = @user
 
     respond_to do |format|
-      if @site.save!
+      if @site.save
+        SiteRemoteManager.new(@site).init_folder_content_and_download
         format.html { redirect_to user_sites_path(user_id: @user.id, id: @site.id), notice: "Site was successfully created." }
         format.json { render :show, status: :created, location: @site }
       else

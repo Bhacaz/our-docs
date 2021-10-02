@@ -9,7 +9,7 @@ module Github
       installation_id = params[:installation][:id]
 
       site = Site.find_by(repo: repo, branch: branch, installation_id: installation_id)
-      InstallationClient.new(site).download_new_version if site
+      SiteRemoteManager.new(site).download_new_version if site
     end
   end
 end

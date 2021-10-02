@@ -3,11 +3,12 @@
 
   <%#= render "form", site: @site %>
 
-  <% @repository_names.each do |repo| %>
+  <% @repository_names.each do |repo_detail| %>
     <%= form_with model: [:user, @site] do |form| %>
-      <%= form.text_field :repo, value: repo, readonly: true, style: "width: 250px" %>
+      <%= form.text_field :repo, value: repo_detail[:repo], readonly: true, style: "width: 250px" %>
+      <%= form.text_field :installation_id, value: repo_detail[:installation_id], readonly: true, style: "width: 250px" %>
       <%= form.text_field :branch, value: 'main' %>
-      <%= form.submit 'New Docs', disabled: @user.sites.map(&:repo).include?(repo) %>
+      <%= form.submit 'New Docs', disabled: @user.sites.map(&:repo).include?(repo_detail[:repo]) %>
     <% end %>
 <!--    <div class='level'>-->
 <!--      <div>-->

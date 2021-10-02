@@ -4,9 +4,9 @@
   <%= render @site %>
 
   <div>
-    <%= link_to "Edit this site", edit_user_site_path(@site) %> |
-    <%= link_to "Back to sites", user_sites_path %>
+      <%= link_to "Edit this site", edit_user_site_path(@site) %> |
+      <%= link_to "Back to sites", user_sites_path %>
 
-    <%= button_to "Destroy this site", user_site_path(id: @site), method: :delete %>
+      <%= button_to "Destroy this site", user_site_path(id: @site), method: :delete, class: "button is-danger" %>
   </div>
 </section>
