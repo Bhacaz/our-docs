@@ -1,5 +1,8 @@
 <section class="section">
-  <p id="notice"><%= notice %></p>
+  <div class="notification notice"><%= notice %></div>
 
   <%= render @user %>
+
+  <%= button_to 'My Docs', user_sites_path(user_id: @user.id), method: 'get', class: 'button' %>
+  <%= button_to 'Add Docs', new_user_site_path(user_id: @user.id), method: 'get', class: 'button is-success' %>
 </section>

@@ -1,9 +1,10 @@
 class SitesController < ApplicationController
   before_action :set_site, only: %i[ show edit update destroy ]
+  before_action :set_user
 
   # GET /sites or /sites.json
   def index
-    @sites = Site.all
+    @sites = @user.sites
   end
 
   # GET /sites/1 or /sites/1.json
@@ -13,6 +14,7 @@ class SitesController < ApplicationController
   # GET /sites/new
   def new
     @site = Site.new
+    @repository_names = AvailableRepositories.new(@user, session[:token]).repository_names
   end
 
   # GET /sites/1/edit
@@ -22,10 +24,11 @@ class SitesController < ApplicationController
   # POST /sites or /sites.json
   def create
     @site = Site.new(site_params)
+    @site.user = @user
 
     respond_to do |format|
-      if @site.save
-        format.html { redirect_to @site, notice: "Site was successfully created." }
+      if @site.save!
+        format.html { redirect_to user_sites_path(user_id: @user.id, id: @site.id), notice: "Site was successfully created." }
         format.json { render :show, status: :created, location: @site }
       else
         format.html { render :new, status: :unprocessable_entity }
@@ -51,7 +54,7 @@ class SitesController < ApplicationController
   def destroy
     @site.destroy
     respond_to do |format|
-      format.html { redirect_to sites_url, notice: "Site was successfully destroyed." }
+      format.html { redirect_to user_sites_path, notice: "Site was successfully destroyed." }
       format.json { head :no_content }
     end
   end
@@ -61,6 +64,10 @@ class SitesController < ApplicationController
     def set_site
       @site = Site.find(params[:id])
     end
+
+  def set_user
+    @user = User.find(params[:user_id])
+  end
 
     # Only allow a list of trusted parameters through.
     def site_params

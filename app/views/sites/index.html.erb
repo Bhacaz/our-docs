@@ -1,9 +1,11 @@
-<p id="notice"><%= notice %></p>
+<section class="section">
+  <div class="notification notice"><%= notice %></div>
 
-<h1>Site</h1>
+  <h1>Site</h1>
 
-<div id="sites">
-  <%= render @sites %>
-</div>
+  <div id="sites">
+    <%= render @sites %>
+  </div>
 
-<%= link_to "New site", new_site_path %>
+  <%= link_to "New site", new_user_site_path %>
+</section>

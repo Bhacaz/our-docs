@@ -1,10 +1,12 @@
-<p id="notice"><%= notice %></p>
+<section class="section">
+  <div class="notification notice"><%= notice %></div>
 
-<%= render @site %>
+  <%= render @site %>
 
-<div>
-  <%= link_to "Edit this site", edit_site_path(@site) %> |
-  <%= link_to "Back to sites", sites_path %>
+  <div>
+    <%= link_to "Edit this site", edit_user_site_path(@site) %> |
+    <%= link_to "Back to sites", user_sites_path %>
 
-  <%= button_to "Destroy this site", site_path(@site), method: :delete %>
-</div>
+    <%= button_to "Destroy this site", user_site_path(id: @site), method: :delete %>
+  </div>
+</section>

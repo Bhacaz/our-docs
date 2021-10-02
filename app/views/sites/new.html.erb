@@ -1,9 +1,25 @@
-<h1>New site</h1>
+<section class="section">
+  <h1 class="title is-1">New site</h1>
 
-<%= render "form", site: @site %>
+  <%#= render "form", site: @site %>
 
-<br>
+  <% @repository_names.each do |repo| %>
+    <%= form_with model: [:user, @site] do |form| %>
+      <%= form.text_field :repo, value: repo, readonly: true, style: "width: 250px" %>
+      <%= form.text_field :branch, value: 'main' %>
+      <%= form.submit 'New Docs', disabled: @user.sites.map(&:repo).include?(repo) %>
+    <% end %>
+<!--    <div class='level'>-->
+<!--      <div>-->
+<!--        <span><%#= repo %></span>-->
+        <%#= button_to 'New Docs', user_sites_path(action: :create, site: { repo: repo }), class: 'button', disabled: @user.sites.map(&:repo).include?(repo) %>
+<!--      </div>-->
+<!--    </div>-->
+  <% end %>
 
-<div>
-  <%= link_to "Back to sites", sites_path %>
-</div>
+  <br>
+
+  <div>
+    <%= link_to "Back to sites", user_sites_path %>
+  </div>
+</section>
