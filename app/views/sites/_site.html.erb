@@ -1,0 +1,25 @@
+<div id="<%= dom_id site %>" class="scaffold_record">
+  <p>
+    <strong>Repo:</strong>
+    <%= site.repo %>
+  </p>
+
+  <p>
+    <strong>Branch:</strong>
+    <%= site.branch %>
+  </p>
+
+  <p>
+    <strong>Installation:</strong>
+    <%= site.installation_id %>
+  </p>
+
+  <p>
+    <%= link_to 'Go to Our Docs', "/#{site.repo}" %>
+  </p>
+
+  <p>
+    <%= link_to "Show this site", site_path(id: site.id) %>
+  </p>
+</div>
+<br>
