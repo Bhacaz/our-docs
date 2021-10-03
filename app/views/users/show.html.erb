@@ -3,6 +3,6 @@
 
   <%= render @user %>
 
-  <%= button_to 'My Docs', user_sites_path(user_id: @user.id), method: 'get', class: 'button' %>
-  <%= button_to 'Add Docs', new_user_site_path(user_id: @user.id), method: 'get', class: 'button is-success' %>
+  <%= button_to 'My Docs', sites_path, method: 'get', class: 'button' %>
+  <%= button_to 'Add Docs', new_site_path, method: 'get', class: 'button is-success' %>
 </section>

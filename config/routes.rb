@@ -2,9 +2,8 @@ Rails.application.routes.draw do
   root "home#home"
 
   get '/home', to: 'home#home'
-  resources :users do
-    resources :sites
-  end
+  resources :users
+  resources :sites
 
   # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
 

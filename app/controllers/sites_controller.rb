@@ -13,7 +13,7 @@ class SitesController < ApplicationController
 
   # GET /sites/new
   def new
-    @site = Site.new
+    @site = Site.new(user_id: @user.id)
     @repository_names = AvailableRepositories.new(@user, session[:token]).repository_names_and_installation_ids
   end
 
@@ -29,7 +29,7 @@ class SitesController < ApplicationController
     respond_to do |format|
       if @site.save
         SiteRemoteManager.new(@site).init_folder_content_and_download
-        format.html { redirect_to user_sites_path(user_id: @user.id, id: @site.id), notice: "Site was successfully created." }
+        format.html { redirect_to sites_path(@site), notice: "Site was successfully created." }
         format.json { render :show, status: :created, location: @site }
       else
         format.html { render :new, status: :unprocessable_entity }
@@ -55,7 +55,7 @@ class SitesController < ApplicationController
   def destroy
     @site.destroy
     respond_to do |format|
-      format.html { redirect_to user_sites_path, notice: "Site was successfully destroyed." }
+      format.html { redirect_to sites_path, notice: "Site was successfully destroyed." }
       format.json { head :no_content }
     end
   end
@@ -67,7 +67,7 @@ class SitesController < ApplicationController
     end
 
   def set_user
-    @user = User.find(params[:user_id])
+    @user = User.find(session[:user_id] || 1)
   end
 
     # Only allow a list of trusted parameters through.
