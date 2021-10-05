@@ -5,19 +5,35 @@ class ServeStaticController < ApplicationController
   skip_forgery_protection
 
   def index
-    file = params[:file]
-    file = "#{file}/index.html" if file&.exclude?('.') # If no extension must be index.html of a folder
+    client = ::Octokit::Client.new(access_token: session[:token])
+    content = client.contents(repo, path: file, ref: site.branch)[:content]
 
-    repo = "#{params[:owner]}/#{params[:project]}"
-    site = Site.find_by!(repo: repo)
-
-    unless can_access?(repo)
-      raise ActionController::RoutingError.new('Not Found')
-    end
+    file_name = file.split('/').last
+    path = file.gsub("/#{file_name}", '')
+    folder_write_content = Rails.root.join('tmp', site.site_folder, path)
+    FileUtils.mkdir_p(folder_write_content)
+    full_path = "#{folder_write_content.to_s}/#{file_name}"
+    File.open(full_path, 'w') { |f| f.puts(Base64.decode64(content).force_encoding('UTF-8')) }
 
     status, headers, body =
       ::Rack::File.new(nil)
-                  .serving(request, Rails.root.join('sites', site.site_folder, file || 'index.html'))
+                  .serving(request, full_path)
     render file: body.path, headers: headers, status: status
+  end
+
+  private
+
+  def file
+    file = params[:file].presence || '/index.html'
+    file = "#{file}/index.html" if file&.exclude?('.') # If no extension must be index.html of a folder
+    file
+  end
+
+  def repo
+    "#{params[:owner]}/#{params[:project]}"
+  end
+
+  def site
+    @site ||= Site.find_by!(repo: repo)
   end
 end
