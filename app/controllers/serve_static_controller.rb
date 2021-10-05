@@ -6,6 +6,12 @@ class ServeStaticController < ApplicationController
 
   def index
     client = ::Octokit::Client.new(access_token: session[:token])
+
+    if session[:token].nil? || !can_access?(repo)
+      render :file => "#{Rails.root}/public/404.html", :layout => false, :status => :not_found
+      return
+    end
+
     content = client.contents(repo, path: file, ref: site.branch)[:content]
 
     file_name = file.split('/').last
