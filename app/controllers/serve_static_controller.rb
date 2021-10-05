@@ -1,29 +1,19 @@
 class ServeStaticController < ApplicationController
   include DocsAccessConcern
 
+  before_action :validate_permission, only: :index
+  before_action :download_site_if_no_present, only: :index
+
   layout false
   skip_forgery_protection
 
   def index
-    client = ::Octokit::Client.new(access_token: session[:token])
-
-    if session[:token].nil? || !can_access?(repo)
-      render :file => "#{Rails.root}/public/404.html", :layout => false, :status => :not_found
-      return
-    end
-
-    content = client.contents(repo, path: file, ref: site.branch)[:content]
-
-    file_name = file.split('/').last
-    path = file.gsub("/#{file_name}", '')
-    folder_write_content = Rails.root.join('tmp', site.site_folder, path)
-    FileUtils.mkdir_p(folder_write_content)
-    full_path = "#{folder_write_content.to_s}/#{file_name}"
-    File.open(full_path, 'w') { |f| f.puts(Base64.decode64(content).force_encoding('UTF-8')) }
+    file = params[:file]
+    file = "#{file}/index.html" if file&.exclude?('.') # If no extension must be index.html of a folder
 
     status, headers, body =
       ::Rack::File.new(nil)
-                  .serving(request, full_path)
+                  .serving(request, Rails.root.join('sites', site.site_folder, file || 'index.html'))
     render file: body.path, headers: headers, status: status
   end
 
@@ -41,5 +31,17 @@ class ServeStaticController < ApplicationController
 
   def site
     @site ||= Site.find_by!(repo: repo)
+  end
+
+  def download_site_if_no_present
+    return if File.exist?(Rails.root.join('sites', site.site_folder))
+
+    SiteRemoteManager.new(site).init_folder_content_and_download
+  end
+
+  def validate_permission
+    return unless session[:token].nil? || !can_access?(repo)
+
+    raise ActionController::RoutingError, 'Not Found'
   end
 end
