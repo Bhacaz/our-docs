@@ -17,6 +17,6 @@ class AuthController < ApplicationController
 
     session[:token] = token
     session[:user_id] = user.id
-    redirect_to user_path(user)
+    redirect_to me_user_path
   end
 end
